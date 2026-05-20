@@ -88,13 +88,15 @@ void lihatRiwayatPembelian() {
 }
 
 void cariBukuJudul() {
-    string keyword; cout << "=== CARI JUDUL BUKU ===\nMasukkan Judul: ";
+    string keyword;
+    cout << "=== CARI JUDUL BUKU ===\n"
+         << "Masukkan Judul: ";
     cin.ignore(); getline(cin, keyword);
     bool f = false;
     for (int i = 0; i < MAX_RAK; i++) {
         for (int j = 0; j < MAX_SLOT; j++) {
             buku* ptrBuku = &rakBuku[i][j];
-            if (ptrBuku->isTersedia && ptrBuku->namaBuku.find(keyword) != string::npos) {
+            if (ptrBuku->isTersedia && ptrBuku->namaBuku.find(keyword) > -1) {
                 cout << " -> [Rak " << i+1 << ", Slot " << j+1 << "] " << ptrBuku->namaBuku 
                      << " | Penerbit: " << ptrBuku->namaPenerbit << " | Stok: " << ptrBuku->jumlahStok << " pcs\n";
                 f = true;
@@ -160,10 +162,15 @@ void beliBuku() {
 void kategoribuku() {
     int pil;
     while (true) {
-        cout << "=== KATEGORI BUKU ===\n1. Fiksi\n2. Non-Fiksi\n3. Kembali\nPilih: "; cin >> pil;
-        if (pil == 3) { system("cls"); break; }
-        system("cls"); string katTarget = (pil == 1) ? "Fiksi" : "Non-Fiksi";
-        cout << "=== " << katTarget << " ===\n"; bool ketemu = false;
+        cout << "=== KATEGORI BUKU ===\n"
+             << "1. Fiksi\n"
+             << "2. Non-Fiksi\n"
+             << "3. Kembali\n"
+             << "Pilih: "; cin >> pil;
+        system("cls");
+        string katTarget = ((pil == 1) ? "Fiksi" : "Non-Fiksi");
+        cout << "=== " << katTarget << " ===\n";
+        bool ketemu = false;
         for (int i = 0; i < MAX_RAK; i++)
             for (int j = 0; j < MAX_SLOT; j++)
                 if (rakBuku[i][j].isTersedia && (rakBuku[i][j].kategori == katTarget || rakBuku[i][j].kategori == (pil == 1 ? "fiksi" : "non-fiksi"))) {
@@ -177,9 +184,13 @@ void kategoribuku() {
 
 void halamanAdmin() {
     int pil, r, s, tam;
-    while (true) {
-        cout << "=== MENU ADMIN ===\n1. Tambah Buku\n2. Tambah Stok\n3. Hapus Buku\n4. Riwayat Transaksi\n5. Exit\nPilih: "; cin >> pil;
-        if (pil == 5) { system("cls"); break; }
+    do{
+        cout << "=== MENU ADMIN ===\n"
+             << "1. Tambah Buku\n"
+             << "2. Tambah Stok\n"
+             << "3. Hapus Buku\n"
+             << "4. Riwayat Transaksi\n"
+             << "5. Exit\nPilih: "; cin >> pil;
         system("cls");
         if (pil == 4) { lihatRiwayatPembelian(); continue; }
         cout << "Masukkan No Rak & Slot: "; cin >> r >> s; r--; s--;
@@ -202,12 +213,12 @@ void halamanAdmin() {
             rakBuku[r][s].isTersedia = false; saveDatabaseBuku(); cout << "Buku dihapus.\n";
         } else cout << "Buku tidak ditemukan/pilihan salah!\n";
         aksiSelesai();
-    }
+    }while(pil != 5);
 }
 
 void halamanUser() {
     int pil;
-    while (true) {
+    do{
         cout << "\n=== TOKO BUKU SINAR ABADI ===\n"
              << "1. Daftar Semua Buku\n"
              << "2. Cari via Kategori\n"
@@ -215,8 +226,8 @@ void halamanUser() {
              << "4. Best Seller\n"
              << "5. Beli Buku\n"
              << "6. Riwayat Pembelian\n"
-             << "7. Exit\nPilih: "; cin >> pil;
-        if (pil == 7) { system("cls"); break; }
+             << "7. Exit\n"
+             << "Pilih: "; cin >> pil;
         system("cls");
         if (pil == 1) daftarbuku();
         else if (pil == 2) kategoribuku();
@@ -224,7 +235,7 @@ void halamanUser() {
         else if (pil == 4) sortBukuBestSeller();
         else if (pil == 5) beliBuku();
         else if (pil == 6) lihatRiwayatPembelian();
-    }
+    }while(pil != 3);
 }
 
 bool prosesLogin(string type) {
@@ -233,23 +244,26 @@ bool prosesLogin(string type) {
     string pwd[2] = {type == "A" ? "admindzakwan123" : "dzakwan123", type == "A" ? "adminaufa123" : "aufa123"};
     cin.ignore();
     while (maxAttempt > 0) {
-        cout << "=== LOGIN " << (type == "A" ? "ADMIN" : "MEMBER") << " ===\nUsername: "; getline(cin, u);
+        cout << "=== LOGIN " << (type == "A" ? "ADMIN" : "MEMBER") << " ===\n"
+             << "Username: "; getline(cin, u);
         cout << "Password: "; getline(cin, p);
         for (int i = 0; i < 2; i++) {
             if (u == usn[i] && p == pwd[i]) {
                 cout << "Login Berhasil!\n"; aksiSelesai();
-                if (type == "A") halamanAdmin(); else halamanUser();
+                if (type == "A") halamanAdmin();
+                else halamanUser();
                 return true;
             }
         }
-        maxAttempt--; cout << "Salah! Sisa percobaan: " << maxAttempt << "\n\n";
+        maxAttempt--;
+        cout << "Salah! Sisa percobaan: " << maxAttempt << "\n\n";
     }
     return false;
 }
 
 int main() {
     loadDatabaseBuku(); int pil;
-    while (true) {
+    do{
         cout << "=== MENU UTAMA ===\n"
              << "1. Pelanggan / Member\n"
              << "2. Petugas Admin\n"
@@ -259,9 +273,11 @@ int main() {
         if (pil == 3) { cout << "Sampai jumpa!\n"; break; }
         system("cls");
         if (pil == 1) {
-            char ans; cout << "Masuk akun membership (y/n)? "; cin >> ans;
-            if (ans == 'y' || ans == 'Y') prosesLogin("U"); else { system("cls"); halamanUser(); }
+            char ans;
+            cout << "Masuk akun membership (y/n)? "; cin >> ans;
+            if (ans == 'y' || ans == 'Y') prosesLogin("U");
+            else { system("cls"); halamanUser(); }
         } else if (pil == 2) prosesLogin("A");
-    }
+    }while(pil != 3);
     return 0;
 }
