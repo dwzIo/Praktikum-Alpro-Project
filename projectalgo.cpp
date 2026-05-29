@@ -1,14 +1,16 @@
 #include <iostream>
-#include <cstdlib>
 #include <string>
 #include <fstream>
 #include <sstream>
 using namespace std;
 
 struct buku {
+    int rak;
+    int slot;
     string namaBuku;
     string namaPenerbit;
     string kategori;
+    int harga; //  baru
     int jumlahBest;
     int jumlahStok;
     bool isTersedia;
@@ -28,8 +30,7 @@ buku rakBuku[MAX_RAK][MAX_SLOT];
 
 string replaceChar(string text, char source, char target){
     string newtext = text;
-    int panjang = text.length();
-    for(int i = 0; i < panjang; i ++){
+    for(int i = 0; i < text.length(); i ++){
         if(text[i] == source)
             newtext[i] = target;   
     }
@@ -42,6 +43,18 @@ string replaceSpacetoUnderscore(string text){
 
 string replaceUnderscoretoSpace(string text){
     return replaceChar(text, '_', ' ');
+}
+
+bool cek_input(string input, int& hasil) {
+	if (input.empty()) return false;
+	stringstream ss(input);
+	int angka;
+	char sisa;
+	if (ss >> angka)
+		if (ss >> sisa)
+			return false;
+	hasil = angka;
+    return true;
 }
 
 void aksiSelesai() {
@@ -58,16 +71,21 @@ void loadDatabaseBuku() {
         stringstream ss(line);
         string temp;
         buku buku_temp;
-        replaceUnderscoretoSpace(buku_temp.namaBuku);
-        replaceUnderscoretoSpace(buku_temp.namaPenerbit);
-
+        
+        getline(ss, temp, ' '); if (!temp.empty()) buku_temp.rak = stoi(temp);
+        getline(ss, temp, ' '); if (!temp.empty()) buku_temp.slot = stoi(temp);
         getline(ss, buku_temp.namaBuku, ' ');
         getline(ss, buku_temp.namaPenerbit, ' ');
         getline(ss, buku_temp.kategori, ' ');
         getline(ss, temp, ' '); if (!temp.empty()) buku_temp.jumlahBest = stoi(temp);
         getline(ss, temp, ' '); if (!temp.empty()) buku_temp.jumlahStok = stoi(temp);
-        getline(ss, temp, ' '); if (!temp.empty()) buku_temp.isTersedia = (temp == "true" ? true : false);
+        getline(ss, temp, ' '); if (!temp.empty()) buku_temp.isTersedia = (temp == "1" ? true : false);
 
+        buku_temp.namaBuku = replaceUnderscoretoSpace(buku_temp.namaBuku);
+        buku_temp.namaPenerbit = replaceUnderscoretoSpace(buku_temp.namaPenerbit);
+        buku_temp.kategori = replaceUnderscoretoSpace(buku_temp.kategori);
+
+        rakBuku[buku_temp.rak][buku_temp.slot] = buku_temp;
     }
     file.close();
 }
@@ -78,8 +96,9 @@ void saveDatabaseBuku() {
     for (int i = 0; i < MAX_RAK; i++) {
         for (int j = 0; j < MAX_SLOT; j++) {
             if (rakBuku[i][j].isTersedia) {
-                replaceSpacetoUnderscore(rakBuku[i][j].namaBuku);
-                replaceSpacetoUnderscore(rakBuku[i][j].namaPenerbit);
+                rakBuku[i][j].namaBuku = replaceSpacetoUnderscore(rakBuku[i][j].namaBuku);
+                rakBuku[i][j].namaPenerbit = replaceSpacetoUnderscore(rakBuku[i][j].namaPenerbit);
+                rakBuku[i][j].kategori = replaceSpacetoUnderscore(rakBuku[i][j].kategori);
 
                 file << i << " " << j << " " << rakBuku[i][j].namaBuku << " " << rakBuku[i][j].namaPenerbit << " "
                      << rakBuku[i][j].kategori << " " << rakBuku[i][j].jumlahBest << " " << rakBuku[i][j].jumlahStok << " " 
@@ -103,14 +122,18 @@ void lihatRiwayatPembelian() {
         stringstream ss(line);
         string temp;
         pelanggan pelanggan_temp;
-        replaceUnderscoretoSpace(pelanggan_temp.namaPelanggan);
-        replaceUnderscoretoSpace(pelanggan_temp.namaBukuDibeli);
 
-        getline(ss, pelanggan_temp.namaPelanggan, ';');
-        getline(ss, pelanggan_temp.tanggal, ';');
-        getline(ss, pelanggan_temp.namaBukuDibeli, ';');
-        getline(ss, temp, ';'); if (!temp.empty()) pelanggan_temp.jumlahBeli = stoi(temp); 
-        cout << " -> Pelanggan: " << pelanggan_temp.namaPelanggan << " | Tgl: " << pelanggan_temp.tanggal << " | Buku: " << pelanggan_temp.namaBukuDibeli << " | Jml: " << pelanggan_temp.jumlahBeli << " pcs\n";
+        getline(ss, pelanggan_temp.namaPelanggan, ' ');
+        getline(ss, pelanggan_temp.tanggal, ' ');
+        getline(ss, pelanggan_temp.namaBukuDibeli, ' ');
+        getline(ss, temp, ' '); if (!temp.empty()) pelanggan_temp.jumlahBeli = stoi(temp);
+        
+        pelanggan_temp.namaPelanggan = replaceUnderscoretoSpace(pelanggan_temp.namaPelanggan);
+        pelanggan_temp.namaBukuDibeli = replaceUnderscoretoSpace(pelanggan_temp.namaBukuDibeli);
+        cout << "Pelanggan: " << pelanggan_temp.namaPelanggan << "\n"
+             << "Tgl: " << pelanggan_temp.tanggal << "\n"
+             << "Buku: " << pelanggan_temp.namaBukuDibeli << "\n"
+             << "Jml: " << pelanggan_temp.jumlahBeli << " pcs\n";
         ada = true;
     }
     if (!ada) cout << "[ Belum ada data transaksi ]\n";
@@ -121,8 +144,8 @@ void saveTransaksi(pelanggan p) {
     ofstream file(File_User, ios::app);
     if (!file.is_open()) return;
 
-    replaceSpacetoUnderscore(p.namaPelanggan);
-    replaceSpacetoUnderscore(p.namaBukuDibeli);
+    p.namaPelanggan = replaceSpacetoUnderscore(p.namaPelanggan);
+    p.namaBukuDibeli = replaceSpacetoUnderscore(p.namaBukuDibeli);
     file << p.namaPelanggan << " " << p.tanggal << " " << p.namaBukuDibeli << " " << p.jumlahBeli << "\n";
     file.close();
 }
@@ -138,8 +161,11 @@ void cariBukuJudul() {
         for (int j = 0; j < MAX_SLOT; j++) {
             buku* ptrBuku = &rakBuku[i][j];
             if (ptrBuku->isTersedia && ptrBuku->namaBuku.find(keyword) > -1) {
-                cout << " -> [Rak " << i+1 << ", Slot " << j+1 << "] " << ptrBuku->namaBuku 
-                     << " | Penerbit: " << ptrBuku->namaPenerbit << " | Stok: " << ptrBuku->jumlahStok << " pcs\n";
+                cout << " -> [Rak " << i+1 << ", Slot " << j+1 << "]/n"
+                     << "Nama Buku: " << ptrBuku->namaBuku << "\n"
+                     << "Penerbit: " << ptrBuku->namaPenerbit << "\n"
+                     << "Kategori: " << ptrBuku->kategori << "\n"
+                     << "Stok: " << ptrBuku->jumlahStok << " pcs\n";
                 f = true;
             }
         }
@@ -163,7 +189,11 @@ void sortBukuBestSeller() {
 
     cout << "=== DAFTAR BUKU BEST SELLER ===\n";
     for (int i = 0; i < jml; i++)
-        cout << " " << i+1 << ". Judul: " << daftarPointer[i]->namaBuku << " | Terjual: " << daftarPointer[i]->jumlahBest << " pcs | Sisa: " << daftarPointer[i]->jumlahStok << "\n";
+        cout << "Judul: " << daftarPointer[i]->namaBuku << "\n"
+             << "Penerbit: " << daftarPointer[i]->namaPenerbit << "\n"
+             << "Kategori: " << daftarPointer[i]->kategori << "\n"
+             << "Terjual: " << daftarPointer[i]->jumlahBest << " pcs\n"
+             << "Sisa: " << daftarPointer[i]->jumlahStok << "\n";
     aksiSelesai();
 }
 
@@ -172,13 +202,16 @@ void daftarbuku() {
     for (int i = 0; i < MAX_RAK; i++) {
         for (int j = 0; j < MAX_SLOT; j++) {
             if (rakBuku[i][j].isTersedia) {
-                cout << " -> [Rak " << i+1 << ", Slot " << j+1 << "] " << rakBuku[i][j].namaBuku << " | Stok: " << rakBuku[i][j].jumlahStok << " pcs\n";
+                cout << " -> [Rak " << i+1 << ", Slot " << j+1 << "] " << "\n"
+                     << "Nama Buku: " << rakBuku[i][j].namaBuku << "\n"
+                     << "Penerbit: " << rakBuku[i][j].namaPenerbit << "\n"
+                     << "Kategori: " << rakBuku[i][j].kategori << "\n"
+                     << "Stok: " << rakBuku[i][j].jumlahStok << " pcs\n";
                 ada = true;
             }
         }
     }
     if (!ada) cout << "[ Seluruh Rak Buku Masih Kosong ]\n";
-    aksiSelesai();
 }
 
 void beliBuku() {
@@ -225,40 +258,66 @@ void kategoribuku() {
     }
 }
 
+void tambahbuku(int rak, int slot) {
+    if (rakBuku[rak][slot].isTersedia) {
+    cout << "Slot sudah terisi!\n";
+    return;
+    }
+    else {
+        cout << "Judul: "; getline(cin, rakBuku[rak][slot].namaBuku);
+        cout << "Penerbit: "; getline(cin, rakBuku[rak][slot].namaPenerbit);
+        cout << "Kategori: "; getline(cin, rakBuku[rak][slot].kategori);
+        cout << "Stok: "; cin >> rakBuku[rak][slot].jumlahStok;
+        rakBuku[rak][slot].jumlahBest = 0;
+        rakBuku[rak][slot].isTersedia = true;
+        saveDatabaseBuku();
+        cout << "\nBuku berhasil didaftarkan!\n";
+        }
+}
+
+void tambahstok(int rak, int slot) {
+    int tam;
+    cout << "Stok lama: " << rakBuku[rak][slot].jumlahStok << "\n"
+         << "Tambahan Stok: "; cin >> tam;
+
+    rakBuku[rak][slot].jumlahStok += tam;
+    saveDatabaseBuku();
+    cout << "Stok diperbarui!\n";
+}
+
 void halamanAdmin() {
-    int pil, r, s, tam;
+    int pil, r, s;
     do{
         cout << "=== MENU ADMIN ===\n"
-             << "1. Tambah Buku\n"
-             << "2. Tambah Stok\n"
-             << "3. Hapus Buku\n"
-             << "4. Riwayat Transaksi\n"
-             << "5. Exit\nPilih: "; cin >> pil;
+             << "1. Daftar Semua Buku\n"
+             << "2. Tambah Buku\n"
+             << "3. Tambah Stok\n"
+             << "4. Hapus Buku\n"
+             << "5. Riwayat Transaksi\n"
+             << "6. Exit\n"
+             << "Pilih: "; cin >> pil;
         system("cls");
-        if (pil == 4) { lihatRiwayatPembelian(); continue; }
+        if (pil == 1) {
+            daftarbuku();
+        } else if (pil == 5) { lihatRiwayatPembelian(); continue; }
+
+        if (pil >= 2 && pil <= 4) {
         cout << "Masukkan No Rak & Slot: "; cin >> r >> s; r--; s--;
         if (r < 0 || r >= MAX_RAK || s < 0 || s >= MAX_SLOT) { cout << "Koordinat di luar batas!\n"; aksiSelesai(); continue; }
-        
-        if (pil == 1) {
-            if (rakBuku[r][s].isTersedia) cout << "Slot sudah terisi!\n";
-            else {
-                cout << "Judul: "; getline(cin, rakBuku[r][s].namaBuku);
-                cout << "Penerbit: "; getline(cin, rakBuku[r][s].namaPenerbit);
-                cout << "Kategori: "; getline(cin, rakBuku[r][s].kategori);
-                cout << "Stok: "; cin >> rakBuku[r][s].jumlahStok;
-                cin.ignore();
-                rakBuku[r][s].jumlahBest = 0;
-                rakBuku[r][s].isTersedia = true;
-                saveDatabaseBuku(); cout << "\nBuku berhasil didaftarkan!\n";
-            }
-        } else if (pil == 2 && rakBuku[r][s].isTersedia) {
-            cout << "Stok lama: " << rakBuku[r][s].jumlahStok << "\nTambahan Stok: "; cin >> tam;
-            rakBuku[r][s].jumlahStok += tam; saveDatabaseBuku(); cout << "Stok diperbarui!\n";
+        cin.ignore();
+        }
+    
+        if (pil == 2) {
+            tambahbuku(r, s);
         } else if (pil == 3 && rakBuku[r][s].isTersedia) {
-            rakBuku[r][s].isTersedia = false; saveDatabaseBuku(); cout << "Buku dihapus.\n";
-        } else cout << "Buku tidak ditemukan/pilihan salah!\n";
+            tambahstok(r, s);
+        } else if (pil == 4 && rakBuku[r][s].isTersedia) {
+            rakBuku[r][s].isTersedia = false;
+            saveDatabaseBuku();
+            cout << "Buku dihapus.\n";
+        }
         aksiSelesai();
-    }while(pil != 5);
+    }while(pil != 6);
 }
 
 void halamanUser() {
@@ -270,8 +329,7 @@ void halamanUser() {
              << "3. Cari Judul\n"
              << "4. Best Seller\n"
              << "5. Beli Buku\n"
-             << "6. Riwayat Pembelian\n"
-             << "7. Exit\n"
+             << "6. Exit\n"
              << "Pilih: "; cin >> pil;
         system("cls");
         if (pil == 1) daftarbuku();
@@ -279,8 +337,8 @@ void halamanUser() {
         else if (pil == 3) cariBukuJudul();
         else if (pil == 4) sortBukuBestSeller();
         else if (pil == 5) beliBuku();
-        else if (pil == 6) lihatRiwayatPembelian();
-    }while(pil != 7);
+        aksiSelesai();
+    }while(pil != 6);
 }
 
 bool prosesLogin(string type) {
@@ -301,13 +359,16 @@ bool prosesLogin(string type) {
             }
         }
         maxAttempt--;
-        cout << "Salah! Sisa percobaan: " << maxAttempt << "\n\n";
+        cout << "Salah! Sisa percobaan: " << maxAttempt << "\n";
+        aksiSelesai();
+        cout << "\n";
     }
     return false;
 }
 
 int main() {
-    loadDatabaseBuku(); int pil;
+    loadDatabaseBuku();
+    int pil;
     do{
         cout << "=== MENU UTAMA ===\n"
              << "1. Pelanggan / Member\n"
