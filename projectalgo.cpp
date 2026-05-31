@@ -77,6 +77,7 @@ void loadDatabaseBuku() {
         getline(ss, buku_temp.namaBuku, ' ');
         getline(ss, buku_temp.namaPenerbit, ' ');
         getline(ss, buku_temp.kategori, ' ');
+        getline(ss, temp, ' '); if (!temp.empty()) buku_temp.harga = stoi(temp);
         getline(ss, temp, ' '); if (!temp.empty()) buku_temp.jumlahBest = stoi(temp);
         getline(ss, temp, ' '); if (!temp.empty()) buku_temp.jumlahStok = stoi(temp);
         getline(ss, temp, ' '); if (!temp.empty()) buku_temp.isTersedia = (temp == "1" ? true : false);
@@ -101,7 +102,7 @@ void saveDatabaseBuku() {
                 rakBuku[i][j].kategori = replaceSpacetoUnderscore(rakBuku[i][j].kategori);
 
                 file << i << " " << j << " " << rakBuku[i][j].namaBuku << " " << rakBuku[i][j].namaPenerbit << " "
-                     << rakBuku[i][j].kategori << " " << rakBuku[i][j].jumlahBest << " " << rakBuku[i][j].jumlahStok << " " 
+                     << rakBuku[i][j].kategori << " " << rakBuku[i][j].harga << " "<< rakBuku[i][j].jumlahBest << " " << rakBuku[i][j].jumlahStok << " " 
                      << rakBuku[i][j].isTersedia << "\n";
             }
         }
@@ -165,6 +166,7 @@ void cariBukuJudul() {
                      << "Nama Buku: " << ptrBuku->namaBuku << "\n"
                      << "Penerbit: " << ptrBuku->namaPenerbit << "\n"
                      << "Kategori: " << ptrBuku->kategori << "\n"
+                     << "Harga: " << ptrBuku->harga << "\n"
                      << "Stok: " << ptrBuku->jumlahStok << " pcs\n";
                 f = true;
             }
@@ -192,6 +194,7 @@ void sortBukuBestSeller() {
         cout << "Judul: " << daftarPointer[i]->namaBuku << "\n"
              << "Penerbit: " << daftarPointer[i]->namaPenerbit << "\n"
              << "Kategori: " << daftarPointer[i]->kategori << "\n"
+             << "Harga: " << daftarPointer[i]->harga << "\n"
              << "Terjual: " << daftarPointer[i]->jumlahBest << " pcs\n"
              << "Sisa: " << daftarPointer[i]->jumlahStok << "\n";
     aksiSelesai();
@@ -206,6 +209,7 @@ void daftarbuku() {
                      << "Nama Buku: " << rakBuku[i][j].namaBuku << "\n"
                      << "Penerbit: " << rakBuku[i][j].namaPenerbit << "\n"
                      << "Kategori: " << rakBuku[i][j].kategori << "\n"
+                     << "Harga: " << rakBuku[i][j].harga << "\n"
                      << "Stok: " << rakBuku[i][j].jumlahStok << " pcs\n";
                 ada = true;
             }
@@ -214,18 +218,20 @@ void daftarbuku() {
     if (!ada) cout << "[ Seluruh Rak Buku Masih Kosong ]\n";
 }
 
-void beliBuku() {
+void beliBuku(float diskon) {
     int r, s, jmlBeli;
     pelanggan p;
     cout << "=== BELI BUKU ===\n"
          << "Masukkan No Rak & Slot (misal: 1 2): "; cin >> r >> s;
     r--; s--;
     if (r >= 0 && r < MAX_RAK && s >= 0 && s < MAX_SLOT && rakBuku[r][s].isTersedia) {
-        cout << "Buku: " << rakBuku[r][s].namaBuku << " (Stok: " << rakBuku[r][s].jumlahStok << ")\nJumlah Beli: "; cin >> jmlBeli;
+        cout << "Buku: " << rakBuku[r][s].namaBuku << "\n" << "Harga: " << rakBuku[r][s].harga * diskon << " (karena kamu adalah member diskon 5%)" << "\n" << "Stok: " << rakBuku[r][s].jumlahStok << "\nJumlah Beli: "; cin >> jmlBeli;
         if (jmlBeli <= 0 || jmlBeli > rakBuku[r][s].jumlahStok) cout << "Jumlah tidak valid atau stok kurang!\n";
         else {
-            cin.ignore(); cout << "Nama Anda: "; getline(cin, p.namaPelanggan);
+            cin.ignore();
+            cout << "Nama Anda: "; getline(cin, p.namaPelanggan);
             cout << "Tanggal (DD-MM-YYYY): "; getline(cin, p.tanggal);
+
             rakBuku[r][s].jumlahStok -= jmlBeli; rakBuku[r][s].jumlahBest += jmlBeli;
             p.namaBukuDibeli = rakBuku[r][s].namaBuku; p.jumlahBeli = jmlBeli;
             saveDatabaseBuku(); saveTransaksi(p);
@@ -267,6 +273,7 @@ void tambahbuku(int rak, int slot) {
         cout << "Judul: "; getline(cin, rakBuku[rak][slot].namaBuku);
         cout << "Penerbit: "; getline(cin, rakBuku[rak][slot].namaPenerbit);
         cout << "Kategori: "; getline(cin, rakBuku[rak][slot].kategori);
+        cout << "Harga: "; cin >> rakBuku[rak][slot].harga;
         cout << "Stok: "; cin >> rakBuku[rak][slot].jumlahStok;
         rakBuku[rak][slot].jumlahBest = 0;
         rakBuku[rak][slot].isTersedia = true;
@@ -320,7 +327,7 @@ void halamanAdmin() {
     }while(pil != 6);
 }
 
-void halamanUser() {
+void halamanUser(float d) {
     int pil;
     do{
         cout << "\n=== TOKO BUKU SINAR ABADI ===\n"
@@ -336,7 +343,7 @@ void halamanUser() {
         else if (pil == 2) kategoribuku();
         else if (pil == 3) cariBukuJudul();
         else if (pil == 4) sortBukuBestSeller();
-        else if (pil == 5) beliBuku();
+        else if (pil == 5) beliBuku(d);
         aksiSelesai();
     }while(pil != 6);
 }
@@ -354,7 +361,12 @@ bool prosesLogin(string type) {
             if (u == usn[i] && p == pwd[i]) {
                 cout << "Login Berhasil!\n"; aksiSelesai();
                 if (type == "A") halamanAdmin();
-                else halamanUser();
+                else {
+                    if (u == "dzakwan" || u == "aufa"){
+                    float diskon = 0.5;
+                    halamanUser(diskon);
+                    }
+                }
                 return true;
             }
         }
@@ -382,7 +394,10 @@ int main() {
             char ans;
             cout << "Masuk akun membership (y/n)? "; cin >> ans;
             if (ans == 'y' || ans == 'Y') prosesLogin("U");
-            else { system("cls"); halamanUser(); }
+            else {
+                float diskon = 1;
+                halamanUser(diskon);
+            }
         } else if (pil == 2) prosesLogin("A");
     }while(pil != 3);
     return 0;
