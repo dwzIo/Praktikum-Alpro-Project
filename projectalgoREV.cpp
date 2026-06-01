@@ -290,13 +290,22 @@ void cariBukuJudul() {
 }
 
 void beliBuku(float diskon) {
+    string l, k;
     int r, s, jmlBeli;
     pelanggan p;
-    cout << "=== BELI BUKU ===\n"
-         << "Masukkan No Rak & Slot (misal: 1 2): "; cin >> r >> s;
+    do {
+        cout << "=== BELI BUKU ===\n"
+             << "Masukkan No Rak & Slot (misal: 1 2): "; cin >> l >> k;
+        if(!cek_input(l, r)) {
+            r = 0; cin.ignore();
+            }
+        if(!cek_input(k, s)) {
+            s = 0; cin.ignore();
+            }
+    }while(r == 0 || s == 0);
     r--; s--;
     if (r >= 0 && r < MAX_RAK && s >= 0 && s < MAX_SLOT && rakBuku[r][s].isTersedia) {
-        cout << "Buku: " << rakBuku[r][s].namaBuku << "\n" << "Harga: " << rakBuku[r][s].harga * diskon << " (karena kamu adalah member diskon 5%)" << "\n" << "Stok: " << rakBuku[r][s].jumlahStok << "\nJumlah Beli: "; cin >> jmlBeli;
+        cout << "Buku: " << rakBuku[r][s].namaBuku << "\n" << "Harga: " << rakBuku[r][s].harga * diskon << "\n" << "Stok: " << rakBuku[r][s].jumlahStok << "\nJumlah Beli: "; cin >> jmlBeli;
         if (jmlBeli <= 0 || jmlBeli > rakBuku[r][s].jumlahStok) cout << "Jumlah tidak valid atau stok kurang!\n";
         else {
             cin.ignore();
@@ -312,25 +321,42 @@ void beliBuku(float diskon) {
 }
 
 void kategoribuku() {
-    int pil;
-    while (true) {
+    string pil;
+    int pilAngka;
+    do{
         cout << "=== KATEGORI BUKU ===\n"
              << "1. Fiksi\n"
              << "2. Non-Fiksi\n"
              << "3. Kembali\n"
              << "Pilih: "; cin >> pil;
         system("cls");
-        string katTarget = ((pil == 1) ? "Fiksi" : "Non-Fiksi");
+
+        if(!cek_input(pil, pilAngka)) {
+            pilAngka = 0;
+            cout << "Input harus berupa angka valid\n";
+            aksiSelesai(); cin.ignore(); continue;
+        }
+        if (pilAngka == 3) {
+            continue; 
+        }
+        if (pilAngka < 1 || pilAngka > 2) {
+            cout << "Pilihan menu tidak tersedia!\n";
+            aksiSelesai(); cin.ignore();
+            continue;
+        }
+        string katTarget = (pilAngka == 1) ? "Fiksi" : "Non-Fiksi";
+        string katTargetLower = (pilAngka == 1) ? "fiksi" : "non-fiksi";
         cout << "=== " << katTarget << " ===\n";
         bool ketemu = false;
         for (int i = 0; i < MAX_RAK; i++)
             for (int j = 0; j < MAX_SLOT; j++)
-                if (rakBuku[i][j].isTersedia && (rakBuku[i][j].kategori == katTarget || rakBuku[i][j].kategori == (pil == 1 ? "fiksi" : "non-fiksi"))) {
-                    cout << " -> [Rak " << i+1 << "][Slot " << j+1 << "] " << rakBuku[i][j].namaBuku << "\n";
+                if (rakBuku[i][j].isTersedia && (rakBuku[i][j].kategori == katTarget || rakBuku[i][j].kategori == katTargetLower)) {
+                    cout << " -> [Rak " << i+1 << "][Slot " << j+1 << "] " << "\n"
+                         << rakBuku[i][j].namaBuku << "\n";
                     ketemu = true;
                 }
         if (!ketemu) cout << "Kategori ini belum tersedia.\n";
-    }
+    }while(pilAngka != 3);
 }
 
 void tambahbuku(int rak, int slot) {
@@ -340,12 +366,44 @@ void tambahbuku(int rak, int slot) {
     return;
     }
     else {
+        string temp;
+        int sub;
         cout << "Judul: "; getline(cin, rakBuku[rak][slot].namaBuku);
         cout << "Penulis: "; getline(cin, rakBuku[rak][slot].namaPenulis);
-        cout << "Tahun Terbit: "; cin >> rakBuku[rak][slot].tahunTerbit;
+
+        do{
+        cout << "Tahun Terbit: "; cin >> temp;
+        if(!cek_input(temp, sub)) {
+            sub = 0;
+            cout << "Input harus berupa angka valid\n";
+            cin.ignore();
+        }
+        }while(sub == 0);
+        rakBuku[rak][slot].tahunTerbit = sub;
+
         cout << "Kategori: "; getline(cin, rakBuku[rak][slot].kategori);
-        cout << "Harga: "; cin >> rakBuku[rak][slot].harga;
-        cout << "Stok: "; cin >> rakBuku[rak][slot].jumlahStok;
+        do{
+            sub = 0;
+        cout << "Harga: "; cin >> temp;
+        if(!cek_input(temp, sub)) {
+            sub = 0;
+            cout << "Input harus berupa angka valid\n";
+            cin.ignore();
+        }
+        }while(sub == 0);
+        rakBuku[rak][slot].harga = sub;
+
+        do{
+            sub = 0;
+        cout << "Stok: "; cin >> temp;
+        if(!cek_input(temp, sub)) {
+            sub = 0;
+            cout << "Input harus berupa angka valid\n";
+            cin.ignore();
+        }
+        }while(sub == 0);
+        rakBuku[rak][slot].jumlahStok = sub;
+
         rakBuku[rak][slot].jumlahBest = 0;
         rakBuku[rak][slot].isTersedia = true;
         saveDatabaseBuku();
@@ -354,17 +412,26 @@ void tambahbuku(int rak, int slot) {
 }
 
 void tambahstok(int rak, int slot) {
-    int tam;
-    cout << "Stok lama: " << rakBuku[rak][slot].jumlahStok << "\n"
-         << "Tambahan Stok: "; cin >> tam;
-
-    rakBuku[rak][slot].jumlahStok += tam;
+    string tam;
+    int tamAngka;
+    do{
+        cout << "Stok lama: " << rakBuku[rak][slot].jumlahStok << "\n"
+             << "Tambahan Stok: "; cin >> tam;
+    
+        if(!cek_input(tam, tamAngka)) {
+            tamAngka = 0;
+            cout << "Input harus berupa angka valid\n";
+            cin.ignore();
+            }
+    }while(tamAngka == 0);
+    rakBuku[rak][slot].jumlahStok += tamAngka;
     saveDatabaseBuku();
     cout << "Stok diperbarui!\n";
 }
 
 void halamanAdmin() {
-    int pil, r, s;
+    string pil;
+    int pilAngka, r, s;
     do{
         cout << "=== MENU ADMIN ===\n"
              << "1. Daftar Semua Buku\n"
@@ -373,33 +440,54 @@ void halamanAdmin() {
              << "4. Hapus Buku\n"
              << "5. Riwayat Transaksi\n"
              << "6. Exit\n"
-             << "Pilih: "; cin >> pil;
+             << "Pilih: "; getline(cin, pil);
         system("cls");
-        if (pil == 1) {
-            daftarbuku();
-        } else if (pil == 5) { lihatRiwayatPembelian(); continue; }
 
-        if (pil >= 2 && pil <= 4) {
-        cout << "Masukkan No Rak & Slot: "; cin >> r >> s; r--; s--;
-        if (r < 0 || r >= MAX_RAK || s < 0 || s >= MAX_SLOT) { cout << "Koordinat di luar batas!\n"; aksiSelesai(); continue; }
-        cin.ignore();
+        if(!cek_input(pil, pilAngka)) {
+            pilAngka = 0;
+            cout << "Input harus berupa angka valid\n";
+            aksiSelesai(); cin.ignore();
+            continue;
+        }
+        if (pilAngka < 1 || pilAngka > 6) {
+            cout << "Pilihan menu tidak tersedia!\n";
+            aksiSelesai(); cin.ignore();
+            continue;
+        }
+        if (pilAngka == 1) {
+            daftarbuku();
+        } else if (pilAngka == 5) { lihatRiwayatPembelian(); continue; }
+
+        if (pilAngka >= 2 && pilAngka <= 4) {
+            string l, k;
+            cout << "Masukkan No Rak & Slot: "; cin >> l >> k;
+            if(!cek_input(l, r)) r = 0;
+            if(!cek_input(k, s)) s = 0;
+            if (r == 0 || s == 0){
+                cout << "Input rak atau slot harus berupa angka valid\n";
+                aksiSelesai(); continue;
+            }
+            r--; s--;
+            if (r < 0 || r >= MAX_RAK || s < 0 || s >= MAX_SLOT) { cout << "Koordinat di luar batas!\n"; aksiSelesai(); continue; }
+            cin.ignore();
         }
     
-        if (pil == 2) {
+        if (pilAngka == 2) {
             tambahbuku(r, s);
-        } else if (pil == 3 && rakBuku[r][s].isTersedia) {
+        } else if (pilAngka == 3 && rakBuku[r][s].isTersedia) {
             tambahstok(r, s);
-        } else if (pil == 4 && rakBuku[r][s].isTersedia) {
+        } else if (pilAngka == 4 && rakBuku[r][s].isTersedia) {
             rakBuku[r][s].isTersedia = false;
             saveDatabaseBuku();
             cout << "Buku dihapus.\n";
         }
         aksiSelesai();
-    }while(pil != 6);
+    }while(pilAngka != 6);
 }
 
 void halamanUser(float d) {
-    int pil;
+    string pil;
+    int pilAngka;
     do{
         cout << "\n=== TOKO BUKU SINAR ABADI ===\n"
              << "1. Daftar Semua Buku\n"
@@ -408,15 +496,27 @@ void halamanUser(float d) {
              << "4. Best Seller\n"
              << "5. Beli Buku\n"
              << "6. Exit\n"
-             << "Pilih: "; cin >> pil;
+             << "Pilih: "; getline(cin,pil);
         system("cls");
-        if (pil == 1) daftarbuku();
-        else if (pil == 2) kategoribuku();
-        else if (pil == 3) cariBukuJudul();
-        else if (pil == 4) sortBukuBestSeller();
-        else if (pil == 5) beliBuku(d);
+
+        if(!cek_input(pil, pilAngka)) {
+            pilAngka = 0;
+            cout << "Input harus berupa angka valid\n";
+            aksiSelesai(); cin.ignore();
+            continue;
+        }
+        if (pilAngka < 1 || pilAngka > 6) {
+            cout << "Pilihan menu tidak tersedia!\n";
+            aksiSelesai(); cin.ignore();
+            continue;
+        }
+        if (pilAngka == 1) daftarbuku();
+        else if (pilAngka == 2) kategoribuku();
+        else if (pilAngka == 3) cariBukuJudul();
+        else if (pilAngka == 4) sortBukuBestSeller();
+        else if (pilAngka == 5) beliBuku(d);
         aksiSelesai();
-    }while(pil != 6);
+    }while(pilAngka != 6);
 }
 
  void buatMember() {
@@ -456,33 +556,46 @@ bool prosesLogin(string type) {
 
 int main() {
     loadDatabaseBuku();
-    int pil;
+    string pil;
+    int pilAngka;
     do{
         cout << "=== MENU UTAMA ===\n"
              << "1. Pelanggan / Member\n"
              << "2. Petugas Admin\n"
              << "3. Keluar\n"
-             << "Pilih: "; cin >> pil;
+             << "Pilih: "; getline(cin, pil);
         system("cls");
-        if (pil == 3) { cout << "Sampai jumpa!\n"; break; }
+
+        if(!cek_input(pil, pilAngka)){
+            pilAngka = 0;
+            cout << "Input harus berupa angka valid\n";
+            aksiSelesai(); cin.ignore();
+            continue; 
+        }
+        if (pilAngka < 1 || pilAngka > 3) {
+            cout << "Pilihan menu tidak tersedia!\n";
+            aksiSelesai(); cin.ignore();
+            continue;
+        }
+        if (pilAngka == 3) { cout << "Sampai jumpa!\n"; break; }
         system("cls");
-        if (pil == 1) {
+        if (pilAngka == 1) {
             char ans;
             cout << "Masuk akun membership (y/n)? "; cin >> ans; system("cls");
             if (ans == 'y' || ans == 'Y') prosesLogin("U");
             else {
                 char create;
-                cout << "Mau membuat akun membership(y/n)? "; cin >> create;
+                cout << "Mau membuat akun membership(y/n)? "; cin >> create; system("cls");
                 if (create == 'y' || create == 'Y') {
                     buatMember();
                     float diskon = 0.05;
                     halamanUser(diskon);
                 }else {
-                float diskon = 1;
-                halamanUser(diskon);
+                    float diskon = 1;
+                    halamanUser(diskon);
                 }
             }
-        } else if (pil == 2) prosesLogin("A");
-    }while(pil != 3);
+        } else if (pilAngka == 2) prosesLogin("A");
+    }while(pilAngka != 3);
     return 0;
 }
