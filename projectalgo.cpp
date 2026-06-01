@@ -402,3 +402,74 @@ int main() {
     }while(pil != 3);
     return 0;
 }
+
+// void loadDatabaseMember() {
+//     ifstream file(File_Member);
+//     if (!file.is_open()) return;
+//     string line;
+//     while (getline(file, line)) {
+//         if (line.empty()) continue;
+//         stringstream ss(line);
+//         string temp;
+//         member member_temp;
+        
+//         getline(ss, member_temp.user, ' ');
+//         getline(ss, member_temp.password, ' ');
+//         getline(ss, temp, ' '); if (!temp.empty()) member_temp.isTersedia = (temp == "1" ? true : false);
+
+//         member_temp.user = replaceUnderscoretoSpace(buku_temp.namaBuku);
+//         member_temp.password = replaceUnderscoretoSpace(buku_temp.namaPenerbit);
+
+//         member = member_temp;
+//     }
+//     file.close();
+// }
+
+// void saveDatabaseMember() {
+//     ofstream file(File_Member, ios::trunc);
+//     if (!file.is_open()) return;
+//     member.user = replaceSpacetoUnderscore(member.user);
+//     member.password = replaceSpacetoUnderscore(member.password);
+
+//     file << member.user << " " << member.password
+//             << " " << member.isTersedia << "\n";
+//             }
+//         }
+//     }
+//     file.close();
+// }
+
+// bool prosesLogin(string type) {
+//     int maxAttempt = 3; string u, p;
+//     {type == "A" ? loadAdmin() : loadMember()};
+//     while (maxAttempt > 0) {
+//         cout << "=== LOGIN " << (type == "A" ? "ADMIN" : "MEMBER") << " ===\n"
+//              << "Username: "; getline(cin, u);
+//         cout << "Password: "; getline(cin, p);
+//         for (int i = 0; i < 2; i++) {
+//             if ((u == admin.user || u == member.user) && (p == admin.password || p == member.password) {
+//                 cout << "Login Berhasil!\n"; aksiSelesai();
+//                 if (type == "A") halamanAdmin();
+//                 else {
+//                    float diskon = 0.5;
+//                    halamanUser(diskon);
+//                 }
+//                 return true;
+//             }
+//         }
+//         maxAttempt--;
+//         cout << "Salah! Sisa percobaan: " << maxAttempt << "\n";
+//         aksiSelesai();
+//         cout << "\n";
+//     }
+//     return false;
+// }
+
+//  void buatMember() {
+//     member member_temp;
+//     cout << "=====membuat member======\n"
+//          << "silahkan masukkan\n";
+//     cout << "Username: "; getline(cin, member_temp.user); if (u == member.user) cout << "username sudah tersedia\n";
+//     cout << "Password: "; getline(cin, member_temp.password);
+//     saveDatabaseMember(member_temp);
+// }
