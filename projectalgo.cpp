@@ -36,13 +36,17 @@ struct admin {
 };
 
 const int MAX_RAK = 5, MAX_SLOT = 20;
-member membership;
-admin staff;
+const int MAX_MEMBER = 100;
+const int MAX_ADMIN = 100;
 const string File_Buku = ("DatabaseBuku.txt");
 const string File_Riwayat = ("DatabaseRiwayat.txt");
 const string File_Member = ("DatabaseMember.txt");
 const string File_Admin = ("DatabaseAdmin.txt");
 buku rakBuku[MAX_RAK][MAX_SLOT];
+member membership[MAX_MEMBER];
+admin staff[MAX_ADMIN];
+int jumlah_member = 0;
+int jumlah_admin = 0;
 
 string replaceChar(string text, char source, char target){
     string newtext = text;
@@ -59,18 +63,6 @@ string replaceSpacetoUnderscore(string text){
 
 string replaceUnderscoretoSpace(string text){
     return replaceChar(text, '_', ' ');
-}
-
-bool cek_input(string input, int& hasil) {
-	if (input.empty()) return false;
-	stringstream ss(input);
-	int angka;
-	char sisa;
-	if (ss >> angka)
-		if (ss >> sisa)
-			return false;
-	hasil = angka;
-    return true;
 }
 
 void aksiSelesai() {
@@ -172,6 +164,7 @@ void loadDatabaseMember() {
     ifstream file(File_Member);
     if (!file.is_open()) return;
     string line;
+    jumlah_member = 0;
     while (getline(file, line)) {
         if (line.empty()) continue;
         stringstream ss(line);
@@ -184,13 +177,14 @@ void loadDatabaseMember() {
 
         member_temp.username = replaceUnderscoretoSpace(member_temp.username);
         member_temp.password = replaceUnderscoretoSpace(member_temp.password);
-        membership = member_temp;
+        membership[jumlah_member] = member_temp;
+        jumlah_member++;
     }
     file.close();
 }
 
 void saveDatabaseMember(member m) {
-    ofstream file(File_Member, ios::app);
+    ofstream file(File_Member, ios::trunc);
     if (!file.is_open()) return;
     m.username = replaceSpacetoUnderscore(m.username);
     m.password = replaceSpacetoUnderscore(m.password);
@@ -205,6 +199,7 @@ void loadDatabaseAdmin() {
     ifstream file(File_Admin);
     if (!file.is_open()) return;
     string line;
+    jumlah_admin = 0;
     while (getline(file, line)) {
         if (line.empty()) continue;
         stringstream ss(line);
@@ -216,7 +211,8 @@ void loadDatabaseAdmin() {
 
         admin_temp.username = replaceUnderscoretoSpace(admin_temp.username);
         admin_temp.password = replaceUnderscoretoSpace(admin_temp.password);
-        staff = admin_temp;
+        staff[jumlah_admin] = admin_temp;
+        jumlah_admin++;
     }
     file.close();
 }
@@ -266,15 +262,15 @@ void daftarbuku() {
 
 void cariBukuJudul() {
     string keyword;
-    cin.ignore();
+    cin.ignore(); 
     cout << "=== CARI JUDUL BUKU ===\n"
          << "Masukkan Judul: ";
-            getline(cin, keyword);
+    getline(cin, keyword);
     bool f = false;
     for (int i = 0; i < MAX_RAK; i++) {
         for (int j = 0; j < MAX_SLOT; j++) {
             buku* ptrBuku = &rakBuku[i][j];
-            if ((ptrBuku->isTersedia) && ((int)ptrBuku->namaBuku.find(keyword) > -1)) {
+            if ((ptrBuku->isTersedia) && (ptrBuku->namaBuku == keyword)) { //(int)ptrBuku->namaBuku.find(keyword) > -1
                 cout << " -> [Rak " << i+1 << ", Slot " << j+1 << "]\n"
                      << "Nama Buku: " << ptrBuku->namaBuku << "\n"
                      << "Penulis: " << ptrBuku->namaPenulis << "\n"
@@ -299,7 +295,7 @@ void beliBuku(float diskon) {
         cout << "Buku: " << rakBuku[r][s].namaBuku << "\n" << "Harga: " << rakBuku[r][s].harga * diskon << " (karena kamu adalah member diskon 5%)" << "\n" << "Stok: " << rakBuku[r][s].jumlahStok << "\nJumlah Beli: "; cin >> jmlBeli;
         if (jmlBeli <= 0 || jmlBeli > rakBuku[r][s].jumlahStok) cout << "Jumlah tidak valid atau stok kurang!\n";
         else {
-            cin.ignore();
+            cin.ignore(); 
             cout << "Nama Anda: "; getline(cin, p.namaPelanggan);
             cout << "Tanggal (DD-MM-YYYY): "; getline(cin, p.tanggal);
 
@@ -313,44 +309,54 @@ void beliBuku(float diskon) {
 
 void kategoribuku() {
     int pil;
-    while (true) {
+    do {
         cout << "=== KATEGORI BUKU ===\n"
              << "1. Fiksi\n"
              << "2. Non-Fiksi\n"
              << "3. Kembali\n"
              << "Pilih: "; cin >> pil;
         system("cls");
-        string katTarget = ((pil == 1) ? "Fiksi" : "Non-Fiksi");
+        if (pil == 3) {
+            continue;
+        }
+        
+        string katTarget = (pil == 1) ? "Fiksi" : "Non-Fiksi";
+        string katTargetLower = (pil == 1) ? "fiksi" : "non-fiksi";
         cout << "=== " << katTarget << " ===\n";
         bool ketemu = false;
         for (int i = 0; i < MAX_RAK; i++)
             for (int j = 0; j < MAX_SLOT; j++)
-                if (rakBuku[i][j].isTersedia && (rakBuku[i][j].kategori == katTarget || rakBuku[i][j].kategori == (pil == 1 ? "fiksi" : "non-fiksi"))) {
-                    cout << " -> [Rak " << i+1 << "][Slot " << j+1 << "] " << rakBuku[i][j].namaBuku << "\n";
+                if (rakBuku[i][j].isTersedia && (rakBuku[i][j].kategori == katTarget || rakBuku[i][j].kategori == katTargetLower)) {
+                    cout << " -> [Rak " << i+1 << "][Slot " << j+1 << "] " << "\n"
+                         << "Nama Buku    : " << rakBuku[i][j].namaBuku << "\n" 
+                         << "Harga (Diskon): " << rakBuku[i][j].harga << "\n"
+                         << "Stok Tersedia: " << rakBuku[i][j].jumlahStok << " pcs\n---------------------\n";
                     ketemu = true;
                 }
         if (!ketemu) cout << "Kategori ini belum tersedia.\n";
-    }
+        aksiSelesai();
+    } while (pil != 3);
 }
 
 void tambahbuku(int rak, int slot) {
-    cin.ignore();
     if (rakBuku[rak][slot].isTersedia) {
-    cout << "Slot sudah terisi!\n";
-    return;
+        cout << "Slot sudah terisi!\n";
+        return;
     }
     else {
         cout << "Judul: "; getline(cin, rakBuku[rak][slot].namaBuku);
         cout << "Penulis: "; getline(cin, rakBuku[rak][slot].namaPenulis);
         cout << "Tahun Terbit: "; cin >> rakBuku[rak][slot].tahunTerbit;
+        cin.ignore(); 
         cout << "Kategori: "; getline(cin, rakBuku[rak][slot].kategori);
         cout << "Harga: "; cin >> rakBuku[rak][slot].harga;
         cout << "Stok: "; cin >> rakBuku[rak][slot].jumlahStok;
+        
         rakBuku[rak][slot].jumlahBest = 0;
         rakBuku[rak][slot].isTersedia = true;
         saveDatabaseBuku();
         cout << "\nBuku berhasil didaftarkan!\n";
-        }
+    }
 }
 
 void tambahstok(int rak, int slot) {
@@ -380,9 +386,13 @@ void halamanAdmin() {
         } else if (pil == 5) { lihatRiwayatPembelian(); continue; }
 
         if (pil >= 2 && pil <= 4) {
-        cout << "Masukkan No Rak & Slot: "; cin >> r >> s; r--; s--;
-        if (r < 0 || r >= MAX_RAK || s < 0 || s >= MAX_SLOT) { cout << "Koordinat di luar batas!\n"; aksiSelesai(); continue; }
-        cin.ignore();
+            cout << "Masukkan No Rak & Slot: "; cin >> r >> s; r--; s--;
+            if (r < 0 || r >= MAX_RAK || s < 0 || s >= MAX_SLOT) { 
+                cout << "Koordinat di luar batas!\n"; 
+                aksiSelesai(); 
+                continue; 
+            }
+            cin.ignore(); 
         }
     
         if (pil == 2) {
@@ -415,32 +425,49 @@ void halamanUser(float d) {
         else if (pil == 3) cariBukuJudul();
         else if (pil == 4) sortBukuBestSeller();
         else if (pil == 5) beliBuku(d);
-        aksiSelesai();
+        if (pil != 6 && pil != 2) aksiSelesai();
     }while(pil != 6);
 }
 
- void buatMember() {
+void buatMember() {
     member member_temp;
-    cout << "=====membuat member======\n"
-         << "silahkan masukkan\n";
-    cout << "Username: "; getline(cin, member_temp.username); if ((member_temp.username == membership.username) && membership.isTersedia) cout << "username sudah tersedia\n";
+    loadDatabaseMember();
+    bool sudahAda;
+    cout << "=====membuat member======\n";
+    do{
+        sudahAda = false;
+        cout << "silahkan masukkan\n";
+        cout << "Username: "; getline(cin, member_temp.username);
+        for (int i = 0; i < jumlah_member; i++) {
+            if ((member_temp.username == membership[i].username) && membership[i].isTersedia) {
+                sudahAda = true;
+                break;
+            }
+        }
+        if (sudahAda) {
+            cout << "Username sudah tersedia / digunakan orang lain!\n";
+        }
+    }while(sudahAda);
+    
     cout << "Password: "; getline(cin, member_temp.password);
+    member_temp.isTersedia = true;
     saveDatabaseMember(member_temp);
 }
 
 bool prosesLogin(string type) {
     int maxAttempt = 3; string u, p;
+    cin.ignore(); 
     (type == "A" ? loadDatabaseAdmin() : loadDatabaseMember());
     while (maxAttempt > 0) {
         cout << "=== LOGIN " << (type == "A" ? "ADMIN" : "MEMBER") << " ===\n"
              << "Username: "; getline(cin, u);
         cout << "Password: "; getline(cin, p);
-        for (int i = 0; i < 2; i++) {
-            if ((u == staff.username && p == staff.password) || (u == membership.username && p == membership.password)) {
+        for (int i = 0; i < 100; i++) {
+            if ((u == staff[i].username && p == staff[i].password) || (u == membership[i].username && p == membership[i].password)) {
                 cout << "Login Berhasil!\n"; aksiSelesai();
                 if (type == "A") halamanAdmin();
                 else {
-                   float diskon = 0.5;
+                   float diskon = 0.05;
                    halamanUser(diskon);
                 }
                 return true;
@@ -462,10 +489,18 @@ int main() {
              << "1. Pelanggan / Member\n"
              << "2. Petugas Admin\n"
              << "3. Keluar\n"
-             << "Pilih: "; cin >> pil;
+             << "Pilih: "; 
+        
+        if (!(cin >> pil)) { 
+            cin.clear(); 
+            cin.ignore();
+            system("cls");
+            continue;
+        }
+        
         system("cls");
         if (pil == 3) { cout << "Sampai jumpa!\n"; break; }
-        system("cls");
+        
         if (pil == 1) {
             char ans;
             cout << "Masuk akun membership (y/n)? "; cin >> ans; system("cls");
@@ -473,13 +508,14 @@ int main() {
             else {
                 char create;
                 cout << "Mau membuat akun membership(y/n)? "; cin >> create;
+                cin.ignore(); 
                 if (create == 'y' || create == 'Y') {
                     buatMember();
                     float diskon = 0.05;
                     halamanUser(diskon);
                 }else {
-                float diskon = 1;
-                halamanUser(diskon);
+                    float diskon = 1;
+                    halamanUser(diskon);
                 }
             }
         } else if (pil == 2) prosesLogin("A");
