@@ -503,11 +503,14 @@ void halamanAdmin() {
         }
         if (pilAngka == 1) {
             daftarbuku();
-        } else if (pilAngka == 5) { lihatRiwayatPembelian(); continue; }
+        } else if (pilAngka == 5) {
+            lihatRiwayatPembelian(); aksiSelesai();
+            continue; 
+        }
 
         if (pilAngka >= 2 && pilAngka <= 4) {
             string l, k;
-            cout << "Masukkan No Rak & Slot: "; cin >> l >> k;
+            cout << "Masukkan No Rak & Slot (misal 1 2): "; cin >> l >> k;
             cin.ignore();
             if(!cek_input(l, r)) r = 0;
             if(!cek_input(k, s)) s = 0;
@@ -533,6 +536,7 @@ void halamanAdmin() {
 }
 
 void halamanUser(float d) {
+    loadDatabaseBuku();
     string pil;
     int pilAngka;
     do{
@@ -602,13 +606,18 @@ bool prosesLogin(string type, int maxAttempt) {
         cout << "Login Gagal! Kesempatan Anda telah habis.\n";
         return false;
     }
+
+    cout << "=== LOGIN " << (type == "A" ? "ADMIN" : "MEMBER") << " ===\n"
+         << "Username: "; getline(cin, u);
+    cout << "Password: "; getline(cin, p);
+
     if (type == "A") {
         for (int i = 0; i < jumlah_admin; i++) {
             if (u == staff[i].username && p == staff[i].password) {
                 cout << "Login Berhasil sebagai Admin!\n"; 
                 aksiSelesai();
                 halamanAdmin();
-                return true;
+                return true;  
             }
         }
     } 
@@ -654,8 +663,9 @@ int main() {
             aksiSelesai();
             continue;
         }
-        if (pilAngka == 3) { cout << "Sampai jumpa!\n"; break; }
-        system("cls");
+        if (pilAngka == 3) {
+            cout << "Sampai jumpa!\n"; break;
+        }
         if (pilAngka == 1) {
             char ans;
             cout << "Masuk akun membership (y/n)? "; cin >> ans; 
@@ -683,7 +693,6 @@ int main() {
                 }
             }
         } else if (pilAngka == 2) {
-            cin.ignore();
             prosesLogin("A", 3);
         }
     }while(pilAngka != 3);
