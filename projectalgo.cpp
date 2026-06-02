@@ -433,6 +433,7 @@ void buatMember() {
     member member_temp;
     loadDatabaseMember();
     bool sudahAda;
+    cin.ignore();
     cout << "=====membuat member======\n";
     do{
         sudahAda = false;
@@ -445,7 +446,7 @@ void buatMember() {
             }
         }
         if (sudahAda) {
-            cout << "Username sudah tersedia / digunakan orang lain!\n";
+            cout << "\nUsername sudah tersedia / digunakan orang lain!\n";
         }
     }while(sudahAda);
     
@@ -454,31 +455,36 @@ void buatMember() {
     saveDatabaseMember(member_temp);
 }
 
-bool prosesLogin(string type) {
-    int maxAttempt = 3; string u, p;
-    cin.ignore(); 
-    (type == "A" ? loadDatabaseAdmin() : loadDatabaseMember());
-    while (maxAttempt > 0) {
-        cout << "=== LOGIN " << (type == "A" ? "ADMIN" : "MEMBER") << " ===\n"
-             << "Username: "; getline(cin, u);
-        cout << "Password: "; getline(cin, p);
-        for (int i = 0; i < 100; i++) {
-            if ((u == staff[i].username && p == staff[i].password) || (u == membership[i].username && p == membership[i].password)) {
-                cout << "Login Berhasil!\n"; aksiSelesai();
-                if (type == "A") halamanAdmin();
-                else {
-                   float diskon = 0.05;
-                   halamanUser(diskon);
-                }
-                return true;
-            }
-        }
-        maxAttempt--;
-        cout << "Salah! Sisa percobaan: " << maxAttempt << "\n";
-        aksiSelesai();
-        cout << "\n";
+bool prosesLogin(string type, int maxAttempt) {
+    string u, p;
+
+    if (maxAttempt == 3) {
+        (type == "A" ? loadDatabaseAdmin() : loadDatabaseMember());
     }
-    return false;
+    if (maxAttempt <= 0) {
+        cout << "Login Gagal! Kesempatan Anda telah habis.\n";
+        return false;
+    }
+    cout << "=== LOGIN " << (type == "A" ? "ADMIN" : "MEMBER") << " ===\n"
+         << "Username: "; getline(cin, u);
+    cout << "Password: "; getline(cin, p);
+    for (int i = 0; i < 100; i++) {
+        if ((u == staff[i].username && p == staff[i].password) || (u == membership[i].username && p == membership[i].password)) {
+            cout << "Login Berhasil!\n"; aksiSelesai();
+            if (type == "A") halamanAdmin();
+            else {
+                cout << "Anda mendapatkan diskon 5%\n";
+                float diskon = 0.05;
+                halamanUser(diskon);
+            }
+            return true;
+        }
+    }
+    maxAttempt--;
+    cout << "Salah! Sisa percobaan: " << maxAttempt << "\n";
+    aksiSelesai();
+    cout << "\n";
+    return prosesLogin(type, maxAttempt);
 }
 
 int main() {
@@ -504,21 +510,23 @@ int main() {
         if (pil == 1) {
             char ans;
             cout << "Masuk akun membership (y/n)? "; cin >> ans; system("cls");
-            if (ans == 'y' || ans == 'Y') prosesLogin("U");
+            if (ans == 'y' || ans == 'Y') prosesLogin("U", 3);
             else {
                 char create;
                 cout << "Mau membuat akun membership(y/n)? "; cin >> create;
-                cin.ignore(); 
+                system("cls");
                 if (create == 'y' || create == 'Y') {
+                    cin.ignore(); 
                     buatMember();
                     float diskon = 0.05;
                     halamanUser(diskon);
                 }else {
+                    cin.ignore(); 
                     float diskon = 1;
                     halamanUser(diskon);
                 }
             }
-        } else if (pil == 2) prosesLogin("A");
+        } else if (pil == 2) prosesLogin("A", 3);
     }while(pil != 3);
     return 0;
 }
