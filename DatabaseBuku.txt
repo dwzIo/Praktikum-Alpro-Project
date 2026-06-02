@@ -1,0 +1,15 @@
+0 0 Laskar_Pelangi Andrea_Hirata 2005 Fiksi 85000 47 6 1
+0 1 Bumi_Manusia Pramoedya_Ananta_Toer 1980 Fiksi 99000 30 3 1
+0 2 Negeri_5_Menara A._Fuadi 2009 Fiksi 75000 25 7 1
+0 3 Pulang Terere_Liye 2015 Fiksi 88000 22 4 1
+1 0 Filosofi_Teras Henry_Manampiring 2018 Non-Fiksi 78000 20 10 1
+1 1 Sebuah_Seni_untuk_Memahami_Kekasih Mark_Manson 2016 Non-Fiksi 68000 18 15 1
+1 2 Sapiens Yuval_Noah_Harari 2011 Non-Fiksi 125000 15 2 1
+1 3 Atomic_Habits James_Clear 2018 Non-Fiksi 108000 14 11 1
+2 0 Cantik_Itu_Luka Eka_Kurniawan 2002 Fiksi 95000 12 6 1
+2 1 Ronggeng_Dukuh_Paruk Ahmad_Tohari 1982 Fiksi 70000 9 8 1
+2 2 Perahu_Kertas Dee_Lestari 2009 Fiksi 80000 8 9 1
+3 0 Berani_Tidak_Disukai Ichiro_Kishimi 2013 Non-Fiksi 93000 7 5 1
+3 1 Dunia_Sophie Jostein_Gaarder 1991 Fiksi 110000 5 3 1
+4 0 Homo_Deus Yuval_Noah_Harari 2015 Non-Fiksi 130000 4 4 1
+4 1 Madilog Tan_Malaka 1943 Non-Fiksi 85000 3 2 1

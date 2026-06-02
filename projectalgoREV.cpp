@@ -470,7 +470,7 @@ void tambahstok(int rak, int slot) {
             tamAngka = 0;
             cout << "Jumlah tidak valid atau stok kurang\n";
         }
-    }while(tamAngka == 0);
+    }while(tamAngka <= 0);
     rakBuku[rak][slot].jumlahStok += tamAngka;
     saveDatabaseBuku();
     cout << "Stok diperbarui!\n";
