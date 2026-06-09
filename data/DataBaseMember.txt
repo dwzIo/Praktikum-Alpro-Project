@@ -1,4 +1,3 @@
-budi_ganteng rahasia123 1
 siti_imut mawar_merah 1
 ahmad_subarjo k0p1_h174m 1
 dewi_lestari perahu_kertas 1
@@ -7,4 +6,5 @@ enggar enggar123 1
 dzakwan dzakwan123 1
 awan awan123 1
 kiki kiki123 1
-kikuy kikuy123 1
+kikuy kikuy123 0
+budi_ganteng rahasia123 1
